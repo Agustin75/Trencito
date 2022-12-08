@@ -39,9 +39,9 @@ public class Player : MonoBehaviour
 
 	public void SetTurn(bool _isTurn)
 	{
-		isTurn = _isTurn;
 		// Set canPlay to false by default
 		canPlay = false;
+        isTurn = _isTurn;
 
 		// Loop through all the cards owned
 		foreach (Card card in cardObjects)
@@ -54,6 +54,7 @@ public class Player : MonoBehaviour
 				// The player has a move they can make
 				canPlay = true;
 		}
+
 	}
 
 	// Called in the initialization to sort the Cards GameObjects visually
