@@ -24,6 +24,7 @@ public class GameManager : MonoBehaviour
     private int cardStackOffset;
     //[SerializeField]
     private List<Player> players = new List<Player>();
+    private List<PlayerHand> playerHands = new List<PlayerHand>();
     private List<int> winners = new List<int>();
 
     // Array storing the outermost cards for each suit. It goes "Low Club", "Low Diamond", "Low Heart", "Low Spade", "High Club", "High Diamond", "High Heart", "High Spade"
@@ -46,7 +47,9 @@ public class GameManager : MonoBehaviour
 
         currentDeck = defaultDeck.GetDeckCopy();
         players.Add(Instantiate(playerPrefab, canvas.transform).GetComponent<Player>());
+        playerHands.Add(players[players.Count - 1].GetComponent<PlayerHand>());
         players.Add(Instantiate(opponentPrefab, canvas.transform).GetComponent<Player>());
+        playerHands.Add(players[players.Count - 1].GetComponent<PlayerHand>());
 
         // TODO: Temporary behavior. It deals the entire deck to 2 players
         while (currentDeck.Count > 0)
@@ -63,13 +66,17 @@ public class GameManager : MonoBehaviour
             // Make the player with the 5 of Diamonds the first player
             if (drawnCard.value == 5 && drawnCard.suit == Suits.Diamonds)
             {
+                // The 5 of Diamonds starts, so make it this player's turn
                 turnPlayer = currentDeck.Count % 2;
             }
         }
 
-        foreach (Player player in players)
+        // Tell the turnPlayer its their turn
+        players[turnPlayer].SetTurn(true);
+
+        foreach (PlayerHand playerHand in playerHands)
         {
-            player.SortHand();
+            playerHand.InitialSetup();
         }
 
         // TODO: Deal cards to every player in the play (Mostly to test stuff out: start with 1, then 2 local, then 2 networked)
@@ -114,7 +121,7 @@ public class GameManager : MonoBehaviour
 
         // Create the new CardObject to play
         Card cardPlayed = Instantiate(cardPrefab).GetComponent<Card>();
-        
+
         // TODO: Set the position to startPos
 
         // Initialize the CardObject from the data passed in (Default of Played and no Owner)
@@ -130,28 +137,37 @@ public class GameManager : MonoBehaviour
 
         // Change the card's transform parent to the appropiate position's transform
         cardPlayed.transform.parent = suitPosition[(int)_cardPlayed.suit];
+
+        // TODO: When adding effects, will have to do a playerHand.CheckForValidMove(); here if the player uses a "play 2 cards" effect
     }
 
     public void ChangeTurn()
     {
+        // Tell the current turn player his turn is over
+        players[turnPlayer].SetTurn(false);
+
+        // It's a new turn, have all players check if they currently have a valid move
+        foreach (PlayerHand playerHand in playerHands)
+        {
+            playerHand.CheckForValidMove();
+        }
+
+        // Move to the next player in line, and keep doing it until a player with a card that can be played is found
+        // TODO: Temporary, loop will be gone when the button for skipping turn is implemented
         do
         {
-            // Tell the current turn player his turn is over
-            players[turnPlayer].SetTurn(false);
-
             // Move the turn to the next player
             turnPlayer++;
             // If the index goes past the players' size
             if (turnPlayer >= players.Count)
                 // Reset back to the first player
                 turnPlayer = 0;
-
-            // Tell the new player it's their turn
-            players[turnPlayer].SetTurn(true);
-
             // Continue as long as the game isn't over
             // TODO: Temporary code! Turn player will have to press a button to skip turn in final version, for player feedback
-        } while (gameState == GameState.Playing && !players[turnPlayer].CanPlay());
+        } while (gameState == GameState.Playing && !playerHands[turnPlayer].HasValidMove);
+
+        // Tell the new player it's their turn
+        players[turnPlayer].SetTurn(true);
     }
 
     // A player played their last card
@@ -166,7 +182,8 @@ public class GameManager : MonoBehaviour
             // Change the game to over
             gameState = GameState.GameOver;
 
-            // TODO: Handle Game Over behavior
+            // Call the Game Over Event
+            EventManager.GameOver();
         }
     }
 }

@@ -7,9 +7,10 @@ using UnityEngine.EventSystems;
 public class Card : MonoBehaviour, IPointerClickHandler
 {
 	[SerializeField]
-	private Text cardText;
-	[SerializeField]
 	private Image cardImage;
+
+	[SerializeField]
+	private AssetManager assetManager;
 
 	private CardInfo info;
 	private CardLocation location;
@@ -30,19 +31,11 @@ public class Card : MonoBehaviour, IPointerClickHandler
 		info = _info;
 		if (_owner != null && _owner.GetPlayerType() != PlayerType.Player)
 		{
-			cardText.text = "XX";
-			cardText.color = Color.black;
+			cardImage.sprite = assetManager.GetCardBack();
 		}
 		else
 		{
-			cardText.text = info.value + " " + info.suit.ToString().Substring(0, 1);
-			switch (info.suit)
-			{
-				case Suits.Diamonds:
-				case Suits.Hearts:
-					cardText.color = Color.red;
-					break;
-			}
+			cardImage.sprite = assetManager.GetCardSprite(info.value, info.suit);
 		}
 
 		ChangeCardLocation(_location, _owner);
@@ -84,7 +77,6 @@ public class Card : MonoBehaviour, IPointerClickHandler
 	public void SetSelectable(bool _selectable)
 	{
 		selectable = _selectable;
-		cardText.color = new Color(cardText.color.r, cardText.color.g, cardText.color.b, selectable ? 1.0f : 0.5f);
 		cardImage.color = selectable ? Color.white : Color.gray;
 	}
 

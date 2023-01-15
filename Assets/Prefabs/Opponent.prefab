@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7030423087454499017}
   - component: {fileID: 7030423087454499019}
   - component: {fileID: 6253961791824144678}
+  - component: {fileID: -8108835539508635287}
   m_Layer: 0
   m_Name: Opponent
   m_TagString: Untagged
@@ -28,6 +29,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -55,7 +57,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 1
-  m_Spacing: -80
+  m_Spacing: -90
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
@@ -75,4 +77,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a80d370c7af3214f8b4ef3a62658485, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerHand: {fileID: -8108835539508635287}
+--- !u!114 &-8108835539508635287
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7030423087454499016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da08f5361ad84204ab28227cadf7b076, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  horizontalGroup: {fileID: 7030423087454499019}
   cardPrefab: {fileID: 4508666165899519002, guid: 4d0a3574ec28cdb4698803d5041bd955, type: 3}
