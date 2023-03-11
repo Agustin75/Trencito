@@ -7,7 +7,7 @@ public class AIPlayer : Player
     // Update is called once per frame
     void Update()
     {
-        if (!gameOver && isTurn)
+        if (!gameOver && isTurn && currInputState != InputState.ShowingFeedback)
         {
             TakeTurn();
         }
@@ -33,6 +33,7 @@ public class AIPlayer : Player
             EventManager.CardPlayed(new CardInfo(selectedCard.GetFaceValue(), selectedCard.GetSuit()), this);
         }
 
+        // TODO: Change this to only trigger once the card has reached its final location (if a card was played)
         // Tell everyone the turn has ended
         EventManager.EndTurn();
     }

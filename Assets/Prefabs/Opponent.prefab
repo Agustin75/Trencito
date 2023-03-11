@@ -78,6 +78,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerHand: {fileID: -8108835539508635287}
+  currInputState: {fileID: 11400000, guid: 339c38f31335cce48932929713854266, type: 2}
 --- !u!114 &-8108835539508635287
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -90,5 +91,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da08f5361ad84204ab28227cadf7b076, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  horizontalGroup: {fileID: 7030423087454499019}
   cardPrefab: {fileID: 4508666165899519002, guid: 4d0a3574ec28cdb4698803d5041bd955, type: 3}
+  horizontalGroup: {fileID: 7030423087454499019}

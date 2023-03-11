@@ -59,7 +59,7 @@ public class PlayerHand : MonoBehaviour
                 break;
         }
 
-        // Spawn the hard from the hand
+        // Spawn the card from the hand
         Card newCard = Instantiate(cardPrefab, transform).GetComponent<Card>();
         // Assign the values to the spawned card
         newCard.Initialize(_newCard, CardLocation.OnHand, _owner);

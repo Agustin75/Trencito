@@ -9,6 +9,10 @@ public class Player : MonoBehaviour
     [SerializeField]
     protected PlayerHand playerHand;
 
+    [Header("Scriptable Objects")]
+    [SerializeField]
+    protected InputStateVariable currInputState;
+
     protected bool isTurn = false;
     protected bool gameOver = false;
 

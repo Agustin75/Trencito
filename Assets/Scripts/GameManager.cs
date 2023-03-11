@@ -17,15 +17,24 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private Canvas canvas;
     [SerializeField]
+    private Animation cardPlayAnimation;
+    [SerializeField]
     // Where should the 5 cards be placed
     private Transform[] suitPosition;
     [SerializeField]
     // How far up and down from the 5 the cards should be placed
     private int cardStackOffset;
+
+    [Header("Scriptable Objects")]
+    [SerializeField]
+    protected InputStateVariable currInputState;
+
+
     //[SerializeField]
-    private List<Player> players = new List<Player>();
-    private List<PlayerHand> playerHands = new List<PlayerHand>();
-    private List<int> winners = new List<int>();
+    private List<Player> players = new();
+    private readonly List<PlayerHand> playerHands = new();
+    private readonly List<int> winners = new();
+    private FeedbackType currFeedbackType = FeedbackType.None;
 
     // Array storing the outermost cards for each suit. It goes "Low Club", "Low Diamond", "Low Heart", "Low Spade", "High Club", "High Diamond", "High Heart", "High Spade"
     // If no card of that suit is in play, value will be -1 for both Low and High
@@ -35,6 +44,12 @@ public class GameManager : MonoBehaviour
     private List<CardInfo> currentDeck;
 
     private GameState gameState;
+
+    // Feedback Stuff
+    #region CardMovement
+    private Card cardPlayed = null;
+    private Vector3 startPos, finalPos;
+    #endregion
 
     // Start is called before the first frame update
     void Start()
@@ -71,6 +86,17 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        // TODO: Will need to change this when Networking is implemented and the local player can be a number other than 0
+        switch (turnPlayer)
+        {
+            case 0:
+                currInputState.Value = InputState.WaitingForPlayer;
+                break;
+            default:
+                currInputState.Value = InputState.WaitingForOpponent;
+                break;
+        }
+
         // Tell the turnPlayer its their turn
         players[turnPlayer].SetTurn(true);
 
@@ -85,7 +111,13 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if (currInputState == InputState.ShowingFeedback)
+        {
+            if (currFeedbackType == FeedbackType.CardPlayed)
+            {
+                PlayCardFeedback();
+            }
+        }
     }
 
     private void OnDisable()
@@ -110,35 +142,36 @@ public class GameManager : MonoBehaviour
             outermostCards[(int)(_cardPlayed.suit) + sizeof(Suits)] = _cardPlayed.value;
 
         // Get the position where the card will start moving from (The player's hand location)
-        Vector3 startPos = _owner.transform.position;
+        startPos = _owner.transform.position;
 
         // Get the position where the card will end up
-        Vector3 finalPos = suitPosition[(int)(_cardPlayed.suit)].position;
+        finalPos = suitPosition[(int)(_cardPlayed.suit)].position;
         if (_cardPlayed.value > 5)
             finalPos += new Vector3(0, -cardStackOffset, 0);
         else if (_cardPlayed.value < 5)
             finalPos += new Vector3(0, cardStackOffset, 0);
 
-        // Create the new CardObject to play
-        Card cardPlayed = Instantiate(cardPrefab).GetComponent<Card>();
+        // Create the new CardObject to play (Put the corresponding suit position as a parent)
+        cardPlayed = Instantiate(cardPrefab, suitPosition[(int)_cardPlayed.suit]).GetComponent<Card>();
 
-        // TODO: Set the position to startPos
+        // Set the position to startPos
+        cardPlayed.transform.position = startPos;
 
         // Initialize the CardObject from the data passed in (Default of Played and no Owner)
         cardPlayed.Initialize(_cardPlayed);
 
         // TODO: Play animation of the card moving from the player's hand to the field
 
-        // Manually placing the card on the field
-        cardPlayed.transform.position = finalPos;
-
         // Make the card uninteractable while it's on the board
         cardPlayed.SetSelectable(false);
 
-        // Change the card's transform parent to the appropiate position's transform
-        cardPlayed.transform.parent = suitPosition[(int)_cardPlayed.suit];
-
         // TODO: When adding effects, will have to do a playerHand.CheckForValidMove(); here if the player uses a "play 2 cards" effect
+
+        // Set the current feedback type
+        currFeedbackType = FeedbackType.CardPlayed;
+
+        // Game is giving feedback to the player
+        currInputState.Value = InputState.ShowingFeedback;
     }
 
     public void ChangeTurn()
@@ -184,6 +217,20 @@ public class GameManager : MonoBehaviour
 
             // Call the Game Over Event
             EventManager.GameOver();
+        }
+    }
+
+    //////////////////////////////
+    /// HELPER FUNCTIONS
+    //////////////////////////////
+    private void PlayCardFeedback()
+    {
+        cardPlayed.transform.position = Vector3.Lerp(cardPlayed.transform.position, finalPos, 10 * Time.deltaTime);
+        if (Vector3.Distance(cardPlayed.transform.position, finalPos) <= 0.1f)
+        {
+            cardPlayed.transform.position = finalPos;
+            currFeedbackType = FeedbackType.None;
+            currInputState.Value = InputState.WaitingForPlayer;
         }
     }
 }
