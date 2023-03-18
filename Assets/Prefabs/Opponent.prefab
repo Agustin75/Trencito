@@ -79,6 +79,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerHand: {fileID: -8108835539508635287}
   currInputState: {fileID: 11400000, guid: 339c38f31335cce48932929713854266, type: 2}
+  isGameOver: {fileID: 11400000, guid: 847c410313f1ec74dbee4207777e625c, type: 2}
 --- !u!114 &-8108835539508635287
 MonoBehaviour:
   m_ObjectHideFlags: 0

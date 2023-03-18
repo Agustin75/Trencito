@@ -12,25 +12,26 @@ public class Player : MonoBehaviour
     [Header("Scriptable Objects")]
     [SerializeField]
     protected InputStateVariable currInputState;
+    [SerializeField]
+    protected BoolVariable isGameOver;
 
     protected bool isTurn = false;
-    protected bool gameOver = false;
 
     // Start is called before the first frame update
     void Start()
     {
-        EventManager.onGameOver += GameIsOver;
+        EventManager.onGameRestart += InitializePlayer;
     }
 
     // Update is called once per frame
-    void Update()
-    {
+    //void Update()
+    //{
 
-    }
+    //}
 
     private void OnDisable()
     {
-        EventManager.onGameOver -= GameIsOver;
+        EventManager.onGameRestart -= InitializePlayer;
     }
 
     public virtual PlayerType GetPlayerType()
@@ -68,8 +69,10 @@ public class Player : MonoBehaviour
     /////////////////////////////////////////////////
     // Custom Event Functions
     /////////////////////////////////////////////////
-    public void GameIsOver()
+    public void InitializePlayer()
     {
-        gameOver = true;
+        isGameOver.Value = false;
+        isTurn = false;
+        SetTurn(false);
     }
 }

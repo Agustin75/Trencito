@@ -6,7 +6,7 @@ using UnityEngine;
 public class AssetManager : ScriptableObject
 {
     [SerializeField]
-    private List<Sprite> defaultCardSprites = new List<Sprite>();
+    private List<Sprite> defaultCardSprites = new();
     [SerializeField]
     private Sprite defaultCardBack;
 
@@ -26,19 +26,17 @@ public class AssetManager : ScriptableObject
                 break;
         }
 
-        switch (_theme)
+        return _theme switch
         {
-            default:
-                return defaultCardSprites[cardIndex];
-        }
+            _ => defaultCardSprites[cardIndex],
+        };
     }
 
     public Sprite GetCardBack(Theme _theme = Theme.Default)
     {
-        switch (_theme)
+        return _theme switch
         {
-            default:
-                return defaultCardBack;
-        }
+            _ => defaultCardBack,
+        };
     }
 }

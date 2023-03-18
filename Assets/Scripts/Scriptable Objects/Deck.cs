@@ -6,7 +6,7 @@ using UnityEngine;
 public class Deck : ScriptableObject
 {
 	[SerializeField]
-	private List<CardInfo> startingDeck = new List<CardInfo>();
+	private List<CardInfo> startingDeck = new();
 
 	private void OnEnable()
 	{

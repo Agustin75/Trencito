@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Input State")]
+[CreateAssetMenu(menuName = "Variables/Input State")]
 public class InputStateVariable : ScriptableObject
 {
     [SerializeField]

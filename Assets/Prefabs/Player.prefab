@@ -38,7 +38,7 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &7030423087454499019
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -79,6 +79,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerHand: {fileID: -3017687283842141994}
   currInputState: {fileID: 11400000, guid: 339c38f31335cce48932929713854266, type: 2}
+  isGameOver: {fileID: 11400000, guid: 847c410313f1ec74dbee4207777e625c, type: 2}
 --- !u!114 &-3017687283842141994
 MonoBehaviour:
   m_ObjectHideFlags: 0

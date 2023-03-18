@@ -13,8 +13,9 @@ public class PlayerHand : MonoBehaviour
     [SerializeField]
     private HorizontalLayoutGroup horizontalGroup;
 
-    private float cardWidth;
-    private List<Card> cardObjects = new List<Card>();
+    private float cardWidth = 0;
+    private List<Card> cardObjects = new();
+    private int firstEmptyIndex = 0, cardsInHand = 0;
     // Variable to know if the there is currently a valid move to be made
     private bool _hasValidMove = false;
     public bool HasValidMove { get { return _hasValidMove; } }
@@ -23,33 +24,46 @@ public class PlayerHand : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        EventManager.onGameRestart += Initialize;
     }
 
     // Called after all cards have been instantiated
-    public void InitialSetup()
+    public void InitialHandSetup()
     {
-        // Initialize the card width
-        cardWidth = cardObjects[0].GetComponent<RectTransform>().rect.width;
-        // Sort hand by values
+        if (cardWidth == 0)
+            // Initialize the card width
+            cardWidth = cardObjects[0].GetComponent<RectTransform>().rect.width;
+
+        // Sort the card gameobjects to line up with the saved array
         SortHand();
-        UpdateSpacing(cardObjects.Count);
+        // Fix up the spacing between cards so they're all visible
+        UpdateSpacing();
     }
 
     // Update is called once per frame
-    void Update()
-    {
+    //void Update()
+    //{
 
+    //}
+
+    private void OnDisable()
+    {
+        EventManager.onGameRestart -= Initialize;
     }
+
+    public int GetCurrentSize() { return cardsInHand; }
 
     // Add the card to the player's hand and sort the array
     public void AddCard(CardInfo _newCard, Player _owner)
     {
+        // Bool to know if the card needs to be added to the array (either because a new card was instantiated or because it was removed to sort it)
+        bool insertCardIntoArray = false;
+
         // Index where the card will be placed
         int indexToAdd = 0;
 
         // Loop through the existing hand until we find the spot where the card goes or we reach the end
-        for (; indexToAdd < cardObjects.Count; indexToAdd++)
+        for (; indexToAdd < cardObjects.Count && cardObjects[indexToAdd].gameObject.activeInHierarchy; indexToAdd++)
         {
             // If the suit in the index is "higher" than the suit of the card, then exit the loop (Suits are sorted arbitrarily based on their order in the Suits enum)
             if ((int)cardObjects[indexToAdd].GetSuit() > (int)_newCard.suit)
@@ -59,9 +73,43 @@ public class PlayerHand : MonoBehaviour
                 break;
         }
 
-        // Spawn the card from the hand
-        Card newCard = Instantiate(cardPrefab, transform).GetComponent<Card>();
-        // Assign the values to the spawned card
+        Card newCard;
+
+        if (firstEmptyIndex >= cardObjects.Count)
+        {
+            // Spawn the card from the hand
+            newCard = Instantiate(cardPrefab, transform).GetComponent<Card>();
+    
+            insertCardIntoArray = true;
+        }
+        else
+        {
+            // Grab the first hidden card
+            newCard = cardObjects[firstEmptyIndex];
+
+            // If the card is not added in the correct location
+            if (firstEmptyIndex != indexToAdd)
+            {
+                // Remove the card from the array temporarily, to sort it
+                cardObjects.RemoveAt(firstEmptyIndex);
+
+                insertCardIntoArray = true;
+            }
+
+            // Make the card object visible
+            newCard.gameObject.SetActive(true);
+        }
+
+        if (insertCardIntoArray)
+        {
+            // Add the card in the new location
+            cardObjects.Insert(indexToAdd, newCard);
+        }
+
+        // Move the first empty slot 1 further
+        firstEmptyIndex++;
+
+        // Assign the values to the card
         newCard.Initialize(_newCard, CardLocation.OnHand, _owner);
 
         // If the card is the 5 of Diamonds, it will be the starting card, so make it playable and selectable
@@ -72,8 +120,8 @@ public class PlayerHand : MonoBehaviour
             _hasValidMove = true;
         }
 
-        // Add the card to the cardObjects array
-        cardObjects.Insert(indexToAdd, newCard);
+        // A card was added to the hand
+        cardsInHand++;
     }
 
     // Returns false if the player has 0 cards in hand, true otherwise
@@ -81,16 +129,16 @@ public class PlayerHand : MonoBehaviour
     // - A Setting will decide if the card is played automatically upon being pressed or if it asks for confirmation first (for regular gameplay)
     public bool PlayCard(Card _cardPlayed)
     {
-        UpdateSpacing(cardObjects.Count);
+        // Hide the card from the player's hand
+        _cardPlayed.gameObject.SetActive(false);
+        
+        // A card was removed from the hand
+        cardsInHand--;
 
-        // Remove the card object from this player's hand
-        cardObjects.Remove(_cardPlayed);
-
-        // Remove the card from the hand (a new one will be instantiated for playing)
-        Destroy(_cardPlayed.gameObject);
+        UpdateSpacing();
 
         // Return whether the player is still playing
-        return cardObjects.Count != 0;
+        return GetCurrentSize() != 0;
     }
 
     // Checks if the player has a playable card and saves the answer
@@ -127,7 +175,7 @@ public class PlayerHand : MonoBehaviour
     public Card GetRandomPlayableCard()
     {
         // Create a list of the indices all possible cards to play
-        List<int> playableCards = new List<int>();
+        List<int> playableCards = new();
         for (int i = 0; i < cardObjects.Count; i++)
         {
             if (cardObjects[i].IsPlayable())
@@ -138,13 +186,21 @@ public class PlayerHand : MonoBehaviour
         return playableCards.Count == 0 ? null : cardObjects[playableCards[Random.Range(0, playableCards.Count)]];
     }
 
+    /////////////////////////////////////////////////
+    // Custom Event Functions
+    /////////////////////////////////////////////////
+    public void Initialize()
+    {
+        firstEmptyIndex = cardsInHand = 0;
+    }
+
     ///////////////////////////////////
     /// HELPER FUNCTIONS
     ///////////////////////////////////
     // Called in the initialization to sort the Cards GameObjects visually
     private void SortHand()
     {
-        for (int i = 0; i < cardObjects.Count; i++)
+        for (int i = 0; i < cardObjects.Count && cardObjects[i].isActiveAndEnabled; i++)
         {
             // SetSiblingIndex changes where in the list of children the GameObject is in the hierarchy, so they show up in the right order
             cardObjects[i].transform.SetSiblingIndex(i);
@@ -152,12 +208,12 @@ public class PlayerHand : MonoBehaviour
     }
 
     // Updates the spacing between the cards in the Horizontal Layout Group so they're always visible
-    private void UpdateSpacing(int _numCards)
+    private void UpdateSpacing()
     {
         // Find out the difference in width of all the cards and the space to display them
-        float widthDifference = _numCards * cardWidth - GetComponent<RectTransform>().rect.width;
+        float widthDifference = cardsInHand * cardWidth - GetComponent<RectTransform>().rect.width;
         // Update the Horizontal Layout Group's spacing so all the cards are displayed
         // (If the widthDifference is positive, then all cards fit in the screen, so the spacing is set to 0)
-        horizontalGroup.spacing = widthDifference > 0 ? -widthDifference / _numCards : 0;
+        horizontalGroup.spacing = widthDifference > 0 ? -widthDifference / cardsInHand : 0;
     }
 }

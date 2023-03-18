@@ -30,6 +30,7 @@ public class Card : MonoBehaviour, IPointerClickHandler
     void Start()
     {
         EventManager.onCardPlayed += NewCardPlayed;
+        EventManager.onGameRestart += GameReset;
         SetSelectable(selectable);
     }
 
@@ -52,16 +53,20 @@ public class Card : MonoBehaviour, IPointerClickHandler
     // Update is called once per frame
     void Update()
     {
-        if (waitingForFeedback && currInputState != InputState.ShowingFeedback)
+        if (currInputState != InputState.ShowingFeedback)
         {
-            SetSelectable(true);
-            waitingForFeedback = false;
+            if (waitingForFeedback)
+            {
+                SetSelectable(true);
+                waitingForFeedback = false;
+            }
         }
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
         EventManager.onCardPlayed -= NewCardPlayed;
+        EventManager.onGameRestart -= GameReset;
     }
 
     public int GetFaceValue()
@@ -81,7 +86,7 @@ public class Card : MonoBehaviour, IPointerClickHandler
 
     public bool IsPlayable()
     {
-        return playable;
+        return gameObject.activeSelf && playable;
     }
 
     // Change whether the card can currently be played from the hand
@@ -110,13 +115,12 @@ public class Card : MonoBehaviour, IPointerClickHandler
         if (!playable)
             return;
 
+        // Make the card unselectable by default (it will become selectable if it needs to after all the feedback is done)
         SetSelectable(false);
 
         // If this Card is selectable by the player, it's waiting for the card played animation to finish to become selectable
         waitingForFeedback = _ownerTurn && owner.GetPlayerType() == PlayerType.Player;
 
-        //// If it's currently the owner's turn, make the card selectable
-        //SetSelectable(_ownerTurn && owner.GetPlayerType() != PlayerType.AIPlayer);
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -130,9 +134,6 @@ public class Card : MonoBehaviour, IPointerClickHandler
 
         // Call the onCardPlayed event
         EventManager.CardPlayed(info, owner);
-
-        // Tell everyone the turn has ended
-        EventManager.EndTurn();
     }
 
     /////////////////////////////////////////////////
@@ -142,6 +143,9 @@ public class Card : MonoBehaviour, IPointerClickHandler
     {
         if (owner == null || _cardPlayedInfo == info)
             return;
+
+        // Make the card unselectable by default, it needs to show the feedback first
+        SetSelectable(false);
 
         if (_cardPlayedInfo.suit != info.suit)
         {
@@ -154,5 +158,15 @@ public class Card : MonoBehaviour, IPointerClickHandler
             return;
 
         SetPlayableState(true);
+    }
+
+    public void GameReset()
+    {
+        location = CardLocation.OnHand;
+        owner = null;
+        playable = false;
+        selectable = false;
+        SetSelectable(playable);
+        waitingForFeedback = false;
     }
 }
