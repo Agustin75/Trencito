@@ -108,6 +108,9 @@ public class GameManager : MonoBehaviour
 		// Game is giving feedback to the player
 		currInputState.Value = InputState.ShowingFeedback;
 
+		// Make the card a child of the canvas so it shows up and is displayed above other cards
+		cardPlayed.transform.parent = canvas.transform;
+
 		board.PlaceCard(cardPlayed, _owner);
 
         cardPlayed.ChangeCardLocation(CardLocation.Played);

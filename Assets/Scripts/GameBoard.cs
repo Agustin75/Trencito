@@ -61,9 +61,6 @@ public class GameBoard : MonoBehaviour
         else if (cardPlayed.GetFaceValue() < 5)
             finalPos += new Vector3(0, cardStackOffset, 0);
 
-        // Change the card's parent
-        cardPlayed.transform.parent = suitPosition[(int)cardPlayed.GetSuit()];
-
         // Set the position to startPos
         cardPlayed.transform.position = startPos;
 
@@ -97,6 +94,8 @@ public class GameBoard : MonoBehaviour
         cardPlayed.transform.position = Vector3.Lerp(cardPlayed.transform.position, finalPos, 10 * Time.deltaTime);
         if (Vector3.Distance(cardPlayed.transform.position, finalPos) <= 0.1f)
         {
+            // Make the card a child of the corresponding suit position
+            cardPlayed.transform.parent = suitPosition[(int)cardPlayed.GetSuit()];
             cardPlayed.transform.position = finalPos;
             playingCard = false;
             currInputState.Value = InputState.WaitingForPlayer;
