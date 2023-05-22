@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 
 public class Card : MonoBehaviour, IPointerClickHandler
 {
+ 
     [SerializeField]
     private Image cardImage;
 
@@ -16,6 +17,9 @@ public class Card : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     protected InputStateVariable currInputState;
 
+    // Sistema de partículas
+    [SerializeField]
+    private ParticleSystem Particulas;
 
     private CardInfo info;
     private CardLocation location;
@@ -33,6 +37,8 @@ public class Card : MonoBehaviour, IPointerClickHandler
         EventManager.onGameRestart += GameReset;
         SetSelectable(selectable);
     }
+
+
 
     public void Initialize(CardInfo _info, CardLocation _location = CardLocation.Played, Player _owner = null)
     {
@@ -53,6 +59,7 @@ public class Card : MonoBehaviour, IPointerClickHandler
     // Update is called once per frame
     void Update()
     {
+       
         if (currInputState != InputState.ShowingFeedback)
         {
             if (waitingForFeedback)
@@ -134,6 +141,9 @@ public class Card : MonoBehaviour, IPointerClickHandler
 
         // Call the onCardPlayed event
         EventManager.CardPlayed(info, owner);
+
+        // La idea de esto es que cuando uno hace click en la carta a jugar se reproducen las particulas, así no hay que setearlas en todas, pero no se donde estaba el comando que lo hacía
+        Particulas.Play();
     }
 
     /////////////////////////////////////////////////
