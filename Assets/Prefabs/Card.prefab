@@ -173,6 +173,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardImage: {fileID: 1268017696383686458}
   assetManager: {fileID: 11400000, guid: e4955f5fc836df746ab55cb5d219ce16, type: 2}
+  cardAnimator: {fileID: 4269100208175109911}
   currInputState: {fileID: 11400000, guid: 339c38f31335cce48932929713854266, type: 2}
 --- !u!95 &4269100208175109911
 Animator:
@@ -184,7 +185,7 @@ Animator:
   m_GameObject: {fileID: 4508666165899519002}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: cdea1360e03ac7e4cab3ba8d2e5267a2, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0

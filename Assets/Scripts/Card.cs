@@ -13,13 +13,16 @@ public class Card : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private AssetManager assetManager;
 
+    [SerializeField]
+    private Animator cardAnimator;
+
     [Header("Scriptable Objects")]
     [SerializeField]
     protected InputStateVariable currInputState;
 
     // Sistema de partículas
-    [SerializeField]
-    private ParticleSystem Particulas;
+    //[SerializeField]
+    //private ParticleSystem Particulas;
 
     private CardInfo info;
     private CardLocation location;
@@ -54,6 +57,9 @@ public class Card : MonoBehaviour, IPointerClickHandler
 
         ChangeCardLocation(_location, _owner);
         SetPlayableState(false);
+
+        // Set the number of the animation to the number of the card to know which Play Animation to play later
+        cardAnimator.SetInteger("Number", info.value);
     }
 
     // Update is called once per frame
@@ -143,7 +149,13 @@ public class Card : MonoBehaviour, IPointerClickHandler
         EventManager.CardPlayed(info, owner);
 
         // La idea de esto es que cuando uno hace click en la carta a jugar se reproducen las particulas, así no hay que setearlas en todas, pero no se donde estaba el comando que lo hacía
-        Particulas.Play();
+        //Particulas.Play();
+    }
+
+    // Play the corresponding Trigger-based animation
+    public void PlayTriggerAnimation(string _animation)
+    {
+        cardAnimator.SetTrigger(_animation);
     }
 
     /////////////////////////////////////////////////

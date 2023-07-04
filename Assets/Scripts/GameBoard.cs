@@ -71,6 +71,9 @@ public class GameBoard : MonoBehaviour
         cardsOnBoard.Add(cardPlayed);
 
         playingCard = true;
+
+        // Tell the card to play the card played animation
+        cardPlayed.PlayTriggerAnimation("Play");
     }
 
     /////////////////////////////////////////////////
